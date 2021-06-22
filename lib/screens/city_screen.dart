@@ -35,7 +35,7 @@ class _CityScreenState extends State<CityScreen> {
                 padding: EdgeInsets.all(20.0),
                 child: null,
               ),
-              FlatButton(
+              ElevatedButton(
                 onPressed: () {},
                 child: Text(
                   'Get Weather',
