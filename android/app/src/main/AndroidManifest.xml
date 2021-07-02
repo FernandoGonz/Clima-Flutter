@@ -2,6 +2,9 @@
     package="co.appbrewery.clima">
 
     <uses-permission android:name="android.permission.ACCESS_coarse_location" />
+    <!-- Required to fetch data from the internet. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
 
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.

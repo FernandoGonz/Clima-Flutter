@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import '../services/location.dart';
+import '../services/networking.dart';
+import 'location_screen.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+
+const apiKey = '9eaa1177ef441f4d51a8a8236a191344';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -7,48 +13,36 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  Future<Position> getLocation() async {
-    // Determine the current position of the device.
 
-    // When the location service are not enabled or permissions
-    // are denied the 'Future' will return an error.
-    bool serviceEnabled;
-    LocationPermission permission;
-    Position position;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print('initState Called');
+    getLocationData();
+  }
 
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location services are disabled.');
-    }
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    super.deactivate();
+    print('deactivate Called');
+  }
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
+  void getLocationData() async {
+    LocationService location = LocationService(); // ../services/location.dart
+    await location.getCurrentPosition();
 
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
+    NetworkHelper networkHelper = NetworkHelper(url: 'http://api.openweathermap.'
+        'org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}'
+        '&appid=$apiKey&units=metric');
 
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low);
-    return position;
+    var decodeData = await networkHelper.getData();
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return LocationScreen(locationWeather: decodeData,);
+    }));
+
   }
 
   @override
@@ -56,12 +50,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: ElevatedButton(
-            onPressed: () {
-              //Get the current location
-              print(getLocation());
-            },
-            child: Text('Get Location'),
+          child: SpinKitDoubleBounce(
+            color: Colors.white,
+            size: 100.0,
           ),
         ),
       ),
